@@ -6,7 +6,8 @@
  * Usage:
  *
  *  Place the attribute 'data-ajax-submit="true"' on either a form tag or a button
- *  that has a formaction attribute.
+ *  that has a formaction attribute for non-javascript enabled form post (full page reload) 
+ *  and has a data-formaction attribute for javascript enabled ajax post.
  *
  *  <form action="#" data-ajax-submit="true">
  *      <input type="submit" value="Submit"/>
@@ -14,7 +15,7 @@
  *
  *  or
  *
- *  <button formaction="#" data-ajax-submit="true">Submit</button>
+ *  <button formaction="#" data-formaction="#" data-ajax-submit="true">Submit</button>
  *
  **/
 
@@ -41,18 +42,18 @@ var ajaxFormSubmit = {
         path = $ajaxForm.attr('action');
       }
 
-      _this.doSubmit(path, $(this).serialize() + '&isAjax');
+      _this.doSubmit(path, $(this).serialize() + '&javascriptEnabled=true', $ajaxForm.attr('data-client')); //  
     });
   },
 
-  doSubmit: function(path, data) {
+  doSubmit: function(path, data, cid) {
     $.ajax({
       url: path,
       type: 'POST',
       data: data
     })
     .done(function(result) {
-      console.log('success', result);
+        $('#client_' + cid + '_notes').html(result);
     })
     .fail(function(result) {
       console.log('error', result);
