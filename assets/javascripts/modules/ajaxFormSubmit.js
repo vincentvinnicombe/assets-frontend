@@ -42,7 +42,7 @@ var ajaxFormSubmit = {
         path = $ajaxForm.attr('action');
       }
 
-      _this.doSubmit(path, $(this).serialize() + '&javascriptEnabled=true', $ajaxForm.attr('data-client'));
+      _this.doSubmit(path, $(this).serialize() + '&isajax=true', $ajaxForm.attr('data-client'));
     });
   },
 
