@@ -51,7 +51,7 @@ var ajaxFormSubmit = {
         var $this = $(this),
             $form = $this.attr('data-ajax-submit') ? $this : $this.find('[data-ajax-submit]'),
             path = $form.attr('formaction') || $form.attr('action'),
-            $scope = $form.attr('data-target-container') || $this,
+            $scope = $form.attr('data-container') || $this,
             serializedData = _this.serializeForAjax($scope),
             callback = {
               config: {
@@ -63,12 +63,14 @@ var ajaxFormSubmit = {
 
         callback.fn = _this.getCalllback(callback.config, serializedData);
 
-        _this.doSubmit(path, serializedData, $form.attr('data-target-container'), $form.attr('data-target-type'), callback.fn);
+        if (!!callback) {
+          _this.doSubmit(path, serializedData, callback.fn);
+        }
       });
     }
   },
 
-  doSubmit: function(path, data, targetContainer, targetType, callback) {
+  doSubmit: function(path, data, callback) {
     $.ajax({
       url: path,
       type: 'POST',
