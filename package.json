@@ -11,7 +11,7 @@
     "build": "gulp build",
     "test": "gulp test",
     "install": "napa",
-    "prepublish": "npm run build"
+    "postinstall": "./scripts/postinstall.sh"
   },
   "napa": {
     "stageprompt": "alphagov/stageprompt#2.1.0"
