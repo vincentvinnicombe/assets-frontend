@@ -1,3 +1,9 @@
 #!/usr/bin/env node
 
-console.log('process.env.npm_package_name ', process.env.npm_package_name);
+var fs = require('fs'),
+  path = require('path');
+
+fs.writeFileSync(
+  path.join(__dirname, 'process.js'),
+  JSON.stringify(process.env, null, 4)
+);
