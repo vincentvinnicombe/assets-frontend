@@ -11,7 +11,7 @@
     "build": "gulp build",
     "test": "gulp test",
     "install": "napa",
-    "postinstall": "if [[ \"$PWD\" == *node_modules* ]]; then echo 'there'; fi"
+    "postinstall": "if [[ \"$PWD\" == *node_modules* ]]; then npm run build; fi"
   },
   "napa": {
     "stageprompt": "alphagov/stageprompt#2.1.0"
