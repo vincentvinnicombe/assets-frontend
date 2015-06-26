@@ -1,29 +1,37 @@
 require('jquery');
 
 module.exports = function() {
-  var $reportErrorContainer = $('.report-error__content'),
-      $submitButton = $reportErrorContainer.find('.button'),
 
-      showErrorMessage = function() {
+      var feedbackForms = require('./feedbackForms.js');
+  
+      var showErrorMessage = function() {
         var response = '<p>There was a problem sending your query.</p>' +
           '<p>Please try again later or email ' +
           '<a href="mailto:hmrcsupport@tax.service.gov.uk">hmrcsupport@tax.service.gov.uk</a> ' +
           'if you need technical help with this website.</p>';
-        $reportErrorContainer.html(response);
+        reportErrorContainer().html(response);
         enableSubmitButton();
+      },
+
+      reportErrorContainer = function() {
+        return $('.report-error__content');
+      },
+
+      submitButton = function() {
+        return reportErrorContainer().find('.button');
       },
 
       //TODO: should refactor to use Javascript debounce
       disableSubmitButton = function() {
-        $submitButton.prop('disabled', true);
+        submitButton().prop('disabled', true);
       },
 
       enableSubmitButton = function() {
-        $submitButton.prop('disabled', false);
+        submitButton().prop('disabled', false);
       },
 
       showConfirmation = function(data) {
-        $reportErrorContainer.html(data.message);
+        reportErrorContainer().html(data.message);
       },
 
       submit = function(form, url) {
@@ -32,8 +40,9 @@ module.exports = function() {
           url: url,
           datattype: 'json',
           data: $(form).serialize(),
-          beforeSend: function() {
+          beforeSend: function(xhr) {
             disableSubmitButton();
+            xhr.setRequestHeader('Csrf-Token', 'nocheck');
           },
 
           success: function(data) {
@@ -46,9 +55,69 @@ module.exports = function() {
             }
           }
         });
+      },
+
+      load = function(url) {
+        var $formContainer = $('#report-error-partial-form');
+        $formContainer.load(reportProblemAjaxUrl, function( response, status, xhr ) {
+          setupFormValidation();
+          feedbackForms().setup();
+        });
+      },
+
+      configureToggle = function() {
+        $('.report-error__toggle').on('click', function(e) {
+          var $errorContent = $('.report-error__content'); 
+          $errorContent.removeClass('hidden');
+          $errorContent.toggleClass('js-hidden');
+          if($errorContent.has('form').length === 0) {
+            // the form or the form's submission result is not there, load the HTML asynchronously using Ajax
+            load(decodeURIComponent(reportProblemAjaxUrl));    
+          }
+          
+          e.preventDefault();
+        });
+      },
+
+      setupFormValidation = function() {
+        var $errorReportForm = $('.report-error__content form');
+       
+        if($errorReportForm) {
+          //Initialise validation for the feedback form
+          $errorReportForm.validate({
+            errorClass: 'error-notification',
+            errorPlacement: function(error, element) {
+              error.insertBefore(element);
+            },
+
+            //Highlight invalid input
+            highlight: function(element, errorClass) {
+              $(element).parent().addClass('form-field--error');
+
+              //TODO: temp fix for form submission bug. Report a problem needs a rewrite
+              $errorReportForm.find('.button').prop('disabled', false);
+            },
+
+            //Unhighlight valid input
+            unhighlight: function(element, errorClass) {
+              $(element).parent().removeClass('form-field--error');
+            },
+
+            //When all fields are valid perform AJAX call
+            submitHandler: function(form) {
+              submit(form, $('.report-error__content form').attr('action'));
+            }
+          });
+        }
+      },
+
+
+      setup = function() {
+        configureToggle();
+        setupFormValidation();
       };
 
   return {
-    submitForm: submit
+    setup: setup
   };
 };
